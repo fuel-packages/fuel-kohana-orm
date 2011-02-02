@@ -1,4 +1,6 @@
+-------------------------------------------------------------------------------------
 To install this package:
+
 1. Through OIL:
 		php oil package install kohana-orm
 		
@@ -17,7 +19,13 @@ To install this package:
 				),
 		4. Ensure correct database settings are provided in DOCROOT/app/config/db.php
 
-		Using the ORM:
+
+
+-------------------------------------------------------------------------------------
+
+
+
+Using the ORM:
 
 			// DOCROOT/app/class/controller/welcome.php
 			class Controller_Welcome extends Controller {
@@ -40,3 +48,4 @@ To install this package:
 			}
 
 		See http://kohanaframework.org/guide/orm for full usage instructions.
+-------------------------------------------------------------------------------------
