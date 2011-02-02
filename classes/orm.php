@@ -303,8 +303,7 @@ class ORM {
 		}
 		else
 		{
-			throw new Kohana_Exception('Invalid method :method called in :class',
-				array(':method' => $method, ':class' => get_class($this)));
+			throw new \Exception(sprintf('Invalid method %s called in %s', $method, $this));
 		}
 	}
 
@@ -383,8 +382,7 @@ class ORM {
 		}
 		else
 		{
-			throw new Kohana_Exception('The :property property does not exist in the :class class',
-				array(':property' => $column, ':class' => get_class($this)));
+			throw new \Exception(sprintf('The %s property does not exist in the %s class', $column, get_class($this)));
 		}
 	}
 
@@ -435,8 +433,7 @@ class ORM {
 		}
 		else
 		{
-			throw new Kohana_Exception('The :property: property does not exist in the :class: class',
-				array(':property:' => $column, ':class:' => get_class($this)));
+			throw new \Exception(sprintf('The %s property does not exist in the %s class', $column, get_class($this)));
 		}
 	}
 
