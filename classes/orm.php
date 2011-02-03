@@ -342,7 +342,7 @@ class ORM {
 			$to_get = substr($method, 4);
 			
 			// check to see if it exists
-			if (array_key_exists($to_get, $this->_object))
+			if (array_key_exists($to_get, $this->_object) && ! empty($this->_object[$to_get]))
 			{
 				return $this->{$to_get};
 			}
