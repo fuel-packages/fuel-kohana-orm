@@ -301,9 +301,58 @@ class ORM {
 
 			return $this;
 		}
+		
+		// Lets find stuff
+		else if (strpos($method, 'find_') === 0)
+		{
+			// Determine find type
+			$find_type = strncmp($method, 'find_all_by_', 12) === 0 ? 'find_all' : (strncmp($method, 'find_by_', 8) === 0 ? 'find' : false);
+			
+			// What we're finding
+			$method = $find_type === 'find' ? substr($method, 8) : substr($method, 12);
+			
+			// Get the and parts
+			$and_parts = explode('_and_', $method);
+			
+			// Load another instance of this model to find out what the table name is
+			$table_name = $this->_table_name;
+			
+			foreach ($and_parts as $and_part)
+			{
+				$or_parts = explode('_or_', $and_part);
+				
+				if (count($or_parts) == 1)
+				{
+					$this->where($or_parts[0], '=', array_shift($args));
+				}
+				else
+				{
+					foreach($or_parts as $or_part)
+					{
+						$this->or_where($or_parts, '=', array_shift($args));
+					}
+				}
+			}
+			
+			return $this->{$find_type}();
+		}
+		else if (strpos($method, 'get_') === 0)
+		{
+			// work out what we want
+			$to_get = substr($method, 4);
+			
+			// check to see if it exists
+			if (array_key_exists($to_get, $this->_object))
+			{
+				return $this->{$to_get};
+			}
+			
+			return false;
+		}
+		// Give up
 		else
 		{
-			throw new \Exception(sprintf('Invalid method %s called in %s', $method, $this));
+			throw new ORM_Exception(sprintf('Invalid method %s called in %s', $method, $this));
 		}
 	}
 

@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------------
+s-------------------------------------------------------------------------------------
 To install this package:
 
 1. Through OIL:
@@ -38,6 +38,14 @@ Using the ORM:
 					{
 						echo nl2br($client->first_name . PHP_EOL);
 					}
+				}
+				
+				// Additionally, you can use the orm as follows:
+				$clients = ORM::factory('client')->find_all_by_last_name('corlet');
+				
+				foreach ($clients as $client)
+				{
+					echo nl2br($client->get_first_name() . PHP_EOL);
 				}
 			}
 
