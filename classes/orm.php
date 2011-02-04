@@ -29,30 +29,12 @@ class ORM extends Kohana_ORM
 		 loads the child model (which extends this class).
 		 */
 		
-		// The class (this class, without namespace)
-		$exploded_ns = explode('\\', __CLASS__);
-		$actual_class = array_pop($exploded_ns);
-		unset($exploded_ns);
-		
-		// The class called by the user
-		$exploded_ns = explode('\\', get_called_class());
-		$called_class = array_pop($exploded_ns);
-		unset($exploded_ns);
-		
-		
-		
-		// If they're the same (user called ORM::factory() or new ORM())
-		if ($actual_class == $called_class)
-		{
-			throw new Kohana_Exception('You must call the child class, not the ORM class.');
-		}
-		
 		// Set the object name and plural name
 		// Namespace Fix
 		$exploded_ns = explode('\\', get_class($this));
 		$this->_object_name   = strtolower(substr(array_pop($exploded_ns), 6));
 		unset($exploded_ns);
-		// $this->_object_name   = strtolower(substr(array_pop(explode('\\', get_class($this))), 6));
+		
 		$this->_object_plural = Inflector::plural($this->_object_name);
 
 		if ( ! isset($this->_sorting))
@@ -120,10 +102,7 @@ class ORM extends Kohana_ORM
 	 */
 	public static function factory($model = NULL, $id = NULL)
 	{
-		// Lets log that it's depreciated
-		\Log::info(sprintf('Method %s() is depreciated. You should start using ORM\ORM::init();', __METHOD__));
-		
-		return new static($id);
+		return new $model($id);
 	}
 	
 	/**
@@ -284,5 +263,151 @@ class ORM extends Kohana_ORM
 		}
 		
 		return parent::__call($method, $arguments);
+	}
+	
+	/**
+	 * Handles retrieval of all model values, relationships, and metadata.
+	 *
+	 * @param   string  column name
+	 * @return  mixed
+	 */
+	public function __get($column)
+	{
+		if (array_key_exists($column, $this->_object))
+		{
+			$this->_load();
+
+			return $this->_object[$column];
+		}
+		elseif (isset($this->_related[$column]) AND $this->_related[$column]->_loaded)
+		{
+			// Return related model that has already been loaded
+			return $this->_related[$column];
+		}
+		elseif (isset($this->_belongs_to[$column]))
+		{
+			$this->_load();
+
+			$model = $this->_related($column);
+
+			// Use this model's column and foreign model's primary key
+			$col = $model->_table_name.'.'.$model->_primary_key;
+			$val = $this->_object[$this->_belongs_to[$column]['foreign_key']];
+
+			$model->where($col, '=', $val)->find();
+
+			return $this->_related[$column] = $model;
+		}
+		elseif (isset($this->_has_one[$column]))
+		{
+			$model = $this->_related($column);
+
+			// Use this model's primary key value and foreign model's column
+			$col = $model->_table_name.'.'.$this->_has_one[$column]['foreign_key'];
+			$val = $this->pk();
+
+			$model->where($col, '=', $val)->find();
+
+			return $this->_related[$column] = $model;
+		}
+		elseif (isset($this->_has_many[$column]))
+		{
+			$model = $this->_has_many[$column]['model'];
+			$model = $this->_get_relationship_class_name($model);
+			$model = $model::init();
+			
+			if (isset($this->_has_many[$column]['through']))
+			{
+				// Grab has_many "through" relationship table
+				$through = $this->_has_many[$column]['through'];
+
+				// Join on through model's target foreign key (far_key) and target model's primary key
+				$join_col1 = $through.'.'.$this->_has_many[$column]['far_key'];
+				$join_col2 = $model->_table_name.'.'.$model->_primary_key;
+
+				$model->join($through)->on($join_col1, '=', $join_col2);
+
+				// Through table's source foreign key (foreign_key) should be this model's primary key
+				$col = $through.'.'.$this->_has_many[$column]['foreign_key'];
+				$val = $this->pk();
+			}
+			else
+			{
+				// Simple has_many relationship, search where target model's foreign key is this model's primary key
+				$col = $model->_table_name.'.'.$this->_has_many[$column]['foreign_key'];
+				$val = $this->pk();
+			}
+
+			return $model->where($col, '=', $val);
+		}
+		else
+		{
+			throw new Kohana_Exception('The :property property does not exist in the :class class',
+				array(':property' => $column, ':class' => get_class($this)));
+		}
+	}
+	
+	/**
+	 * Returns an ORM model for the given one-one related alias
+	 *
+	 * @param   string  alias name
+	 * @return  ORM
+	 */
+	protected function _related($alias)
+	{
+		if (isset($this->_related[$alias]))
+		{
+			return $this->_related[$alias];
+		}
+		elseif (isset($this->_has_one[$alias]))
+		{
+			$model = $this->_has_one[$alias]['model'];
+			$model = $this->_get_relationship_class_name($model);
+			return $model::init();
+		}
+		elseif (isset($this->_belongs_to[$alias]))
+		{
+			$model = $this->_belongs_to[$alias]['model'];
+			$model = $this->_get_relationship_class_name($model);
+			return $model::init();
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+	
+	/**
+	 * Get Relationship Class
+	 * 
+	 * This method finds the class
+	 * that is used for the relationship
+	 * of this object. it checks for namespacing
+	 * but if no namespace is provided, it uses
+	 * the same namespace as the called class.
+	 * 
+	 * @access	protected
+	 * @param	string	relationship class
+	 * @return	mixed	intance of class
+	 */
+	protected function _get_relationship_class_name($relationship_class)
+	{
+		// if relationship class has namespace
+		// in it, use that namespace. otherwise, use
+		// the called class' namespace.
+		if (strpos($relationship_class, '\\'))
+		{
+			return $relationship_class;
+		}
+		else
+		{
+			// The called class
+			$called_class = get_called_class();
+
+			// The called class' namespace
+			$called_class_namespace = substr($called_class, 0, -(strlen(strrchr($called_class, '\\'))) + 1);
+			
+			return $called_class_namespace . $relationship_class;
+		}
 	}
 }

@@ -62,12 +62,39 @@
 						$client->save();
 					}
 				}
+				
+				// Due to popular demand, you can use the old factory method,
+				// Although this is NOT recommended. For example
+				$clients = \ORM::factory('\\clients')->find_all();
+				
+				// Note, you need to provide the namespace for the model to be
+				// loaded using the factory method, replacing single slashes with
+				// double slashes (the same as in all your bootstrap.php files).
 			}
 
 			// DOCROOT/app/classes/model/client.php
 			class Model_Client extends \ORM
 			{
-
+				// Relationships are defined as follows:
+				
+				// Same namespace
+				protected $_has_many = array(
+					'cars' => array(
+						// Yes, I know in Kohana you would
+						// have just put 'Client_Car', but
+						// the orm now works out what namespace
+						// you're in if you don't provide it one,
+						// and having to add the 'Model_' prefix
+						// is just too many assumptions.
+						'model' => 'Model_Client_Car'
+				));
+				
+				// Different namespace
+				protected $_has_many = array(
+					'cars' => array(
+						// Notice the double backslashes!
+						'model' => 'Somemodule\\Model_Client_Car'
+				));
 			}
 
 		See http://kohanaframework.org/guide/orm for full usage instructions (magic methods are not available in original ORM).
