@@ -4,7 +4,7 @@
 		php oil package install kohana-orm
 		
 * Manually:
-		1.** Download
+		1. Download
 		2. Copy to DOCROOT/packages/
 		3. Go to DOCROOT/app/config.php and find:
 				'packages'	=> array(
