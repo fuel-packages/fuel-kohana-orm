@@ -23,9 +23,36 @@ class ORM extends Kohana_ORM
 	 */
 	public function __construct($id = NULL)
 	{
+		/*
+		 This first bit of code ensures that the user doesn't
+		 try to load the orm by going ORM::factory(), but rather
+		 loads the child model (which extends this class).
+		 */
+		
+		// The class (this class, without namespace)
+		$exploded_ns = explode('\\', __CLASS__);
+		$actual_class = array_pop($exploded_ns);
+		unset($exploded_ns);
+		
+		// The class called by the user
+		$exploded_ns = explode('\\', get_called_class());
+		$called_class = array_pop($exploded_ns);
+		unset($exploded_ns);
+		
+		
+		
+		// If they're the same (user called ORM::factory() or new ORM())
+		if ($actual_class == $called_class)
+		{
+			throw new Kohana_Exception('You must call the child class, not the ORM class.');
+		}
+		
 		// Set the object name and plural name
 		// Namespace Fix
-		$this->_object_name   = strtolower(substr(array_pop(explode('\\', get_class($this))), 6));
+		$exploded_ns = explode('\\', get_class($this));
+		$this->_object_name   = strtolower(substr(array_pop($exploded_ns), 6));
+		unset($exploded_ns);
+		// $this->_object_name   = strtolower(substr(array_pop(explode('\\', get_class($this))), 6));
 		$this->_object_plural = Inflector::plural($this->_object_name);
 
 		if ( ! isset($this->_sorting))
@@ -79,17 +106,64 @@ class ORM extends Kohana_ORM
 	}
 	
 	/**
-	 * Factory
+	 * Factory (Depreciated)
 	 * 
 	 * Used to return new instance of 
-	 * ORM
+	 * ORM. Note this function is only for backwards
+	 * compatibility (sort of), and you should use
+	 * static::init() instead (or magic methods).
 	 * 
 	 * @access	public
+	 * @param	string	model name (not used).
+	 * @param	int		id of record to load
 	 * @return	ORM
 	 */
-	public static function factory()
+	public static function factory($model = NULL, $id = NULL)
 	{
-		return new static;
+		// Lets log that it's depreciated
+		\Log::info(sprintf('Method %s() is depreciated. You should start using ORM\ORM::init();', __METHOD__));
+		
+		return new static($id);
+	}
+	
+	/**
+	 * Init
+	 * 
+	 * Used to return new instance of 
+	 * ORM.
+	 * 
+	 * The reason for this method
+	 * ontop of static::factory() is that
+	 * this method allows you to put an id
+	 * in as a parameter, without having to
+	 * put NULL as the model parameter (as it
+	 * isn't used). Unfortunately, being a static
+	 * method, static::factory() must support
+	 * the same parameters as the static method in
+	 * the parent class, Kohana_ORM. Supid eh? If
+	 * you don't, you get the following error:
+	 * 
+	 * 		Declaration of ORM\ORM::factory() should be compatible with that of ORM\Kohana_ORM::factory()
+	 * 
+	 * Because I don't want to modify the original
+	 * class, we'll just use init to allow chaining
+	 * of methods in an ORM descendent class.
+	 * 
+	 * This method supports a single parameter, namely
+	 * id. This allows you do init the class with the record of
+	 * id $id to be loaded. For example:
+	 * 
+	 * 		// This will return record where primary 
+	 * 		// Key is 3.
+	 * 		$client = Model_Clients::init(3);
+	 * 
+	 * @access	public
+	 * @param	int		id of record to laod
+	 * @return	ORM
+	 */
+	public static function init($id = NULL)
+	{
+		return new static($id);
 	}
 	
 	/**
@@ -150,7 +224,7 @@ class ORM extends Kohana_ORM
 	 * @param	mixed
 	 * @return	mixed
 	 */
-	public function __call($method, $arguments)
+	public function __call($method, array $arguments)
 	{
 		if (strpos($method, 'find_') === 0)
 		{
