@@ -1,3 +1,7 @@
+##Developers
+* Ben Corlett (PHP Developer, TJS Technology) [@ben_corlett](http://twitter.com/ben_corlett)
+* Thomas Stevens (Lead Developer, TJS Technology) [@tomo89aus](http://twitter.com/tomo89aus)
+
 ##To install this package:
 
 * Through OIL:
@@ -141,5 +145,3 @@
 	
 	For the namespacing (hmvc) support you need to enable your module in DOCROOT/app/config/config.php (around line 130
 	at the time of writing this).
-	
-	If you have any questions, you can reach me on twitter [@ben_corlett](http://www.twitter.com/ben_corlett) or on [Fuel Forums](http://fuelphp.com/users/profile/view/29).
