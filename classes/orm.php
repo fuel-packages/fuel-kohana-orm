@@ -88,6 +88,70 @@ class ORM extends Kohana_ORM
 	}
 	
 	/**
+	 * Initialize
+	 * 
+	 * Prepares the model database connection, determines the table name,
+	 * and loads column information.
+	 *
+	 * @return  void
+	 */
+	protected function _initialize()
+	{
+		if ( ! is_object($this->_db))
+		{
+			// Get database instance
+			$this->_db = Database::instance($this->_db);
+		}
+	
+		if (empty($this->_table_name))
+		{
+			// Table name is the same as the object name
+			$this->_table_name = $this->_object_name;
+	
+			if ($this->_table_names_plural === TRUE)
+			{
+				// Make the table name plural
+				$this->_table_name = Inflector::plural($this->_table_name);
+			}
+		}
+	
+		if ( ! empty($this->_ignored_columns))
+		{
+			// Optimize for performance
+			$this->_ignored_columns = array_combine($this->_ignored_columns, $this->_ignored_columns);
+		}
+	
+		foreach ($this->_belongs_to as $alias => $details)
+		{
+			$defaults['model']       = 'Model_' . $alias;
+			$defaults['foreign_key'] = $alias.$this->_foreign_key_suffix;
+	
+			$this->_belongs_to[$alias] = array_merge($defaults, $details);
+		}
+	
+		foreach ($this->_has_one as $alias => $details)
+		{
+			$defaults['model']       = $alias;
+			$defaults['foreign_key'] = $this->_object_name.$this->_foreign_key_suffix;
+	
+			$this->_has_one[$alias] = array_merge($defaults, $details);
+		}
+	
+		foreach ($this->_has_many as $alias => $details)
+		{
+			$defaults['model']       = 'Model_' . Inflector::singular($alias);
+			$defaults['foreign_key'] = $this->_object_name.$this->_foreign_key_suffix;
+			$defaults['through']     = NULL;
+			$defaults['far_key']     = Inflector::singular($alias).$this->_foreign_key_suffix;
+	
+			$this->_has_many[$alias] = array_merge($defaults, $details);
+		}
+	
+		// Load column information
+		$this->reload_columns();
+	}
+	
+	/**
 	 * Factory (Depreciated)
 	 * 
 	 * Used to return new instance of 
@@ -395,7 +459,7 @@ class ORM extends Kohana_ORM
 		// if relationship class has namespace
 		// in it, use that namespace. otherwise, use
 		// the called class' namespace.
-		if (strpos($relationship_class, '\\'))
+		if (substr($relationship_class, 0, 1) == '\\' || substr($relationship_class, 0, 2) == '\\\\')
 		{
 			return $relationship_class;
 		}
