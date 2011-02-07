@@ -131,7 +131,7 @@ class ORM extends Kohana_ORM
 
 		foreach ($this->_has_one as $alias => $details)
 		{
-			$defaults['model']       = 'Model_' . $alias;
+			$defaults['model']       = $alias;
 			$defaults['foreign_key'] = $this->_object_name.$this->_foreign_key_suffix;
 
 			$this->_has_one[$alias] = array_merge($defaults, $details);
