@@ -11,7 +11,7 @@
 					//'activerecord',
 				),
 
-		   And add 'orm' to array:
+		   And add 'kohana-orm' to array:
 				'packages'	=> array(
 					//'activerecord',
 					'kohana-orm',
