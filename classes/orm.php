@@ -322,7 +322,7 @@ class ORM extends Kohana_ORM
 			
 			if (array_key_exists($to_set, $this->_object))
 			{
-				return $this->_object[$to_set] = array_shift($arguments);
+				return $this->{$to_set} = array_shift($arguments);
 			}
 		}
 		
