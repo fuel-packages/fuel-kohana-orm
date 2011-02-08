@@ -23,37 +23,7 @@ class ORM extends Kohana_ORM
 	 */
 	public function __construct($id = NULL)
 	{
-		/*
-		 This first bit of code ensures that the user doesn't
-		 try to load the orm by going ORM::factory(), but rather
-		 loads the child model (which extends this class).
-		 */
-		
-		// Set the object name and plural name
-		// Namespace Fix
-		$exploded_ns = explode('\\', get_class($this));
-		$this->_object_name   = strtolower(substr(array_pop($exploded_ns), 6));
-		unset($exploded_ns);
-		
-		$this->_object_plural = Inflector::plural($this->_object_name);
-
-		if ( ! isset($this->_sorting))
-		{
-			// Default sorting
-			$this->_sorting = array($this->_primary_key => 'ASC');
-		}
-
-		if ( ! empty($this->_ignored_columns))
-		{
-			// Optimize for performance
-			$this->_ignored_columns = array_combine($this->_ignored_columns, $this->_ignored_columns);
-		}
-
-		// Initialize database
 		$this->_initialize();
-
-		// Clear the object
-		$this->clear();
 
 		if ($id !== NULL)
 		{
@@ -70,20 +40,15 @@ class ORM extends Kohana_ORM
 			else
 			{
 				// Passing the primary key
-
-				// Set the object's primary key, but don't load it until needed
-				$this->_object[$this->_primary_key] = $id;
-
-				// Object is considered saved until something is set
-				$this->_saved = TRUE;
+				$this->where($this->_table_name.'.'.$this->_primary_key, '=', $id)->find();
 			}
 		}
-		elseif ( ! empty($this->_preload_data))
+		elseif ( ! empty($this->_cast_data))
 		{
 			// Load preloaded data from a database call cast
-			$this->_load_values($this->_preload_data);
+			$this->_load_values($this->_cast_data);
 
-			$this->_preload_data = array();
+			$this->_cast_data = array();
 		}
 	}
 	
@@ -97,58 +62,69 @@ class ORM extends Kohana_ORM
 	 */
 	protected function _initialize()
 	{
+		/*
+		 This first bit of code ensures that the user doesn't
+		 try to load the orm by going ORM::factory(), but rather
+		 loads the child model (which extends this class).
+		 */
+		
+		// Set the object name and plural name
+		// Namespace Fix
+		$exploded_ns = explode('\\', get_class($this));
+		$this->_object_name   = strtolower(substr(array_pop($exploded_ns), 6));
+		unset($exploded_ns);
+		
+		$this->_object_plural = Inflector::plural($this->_object_name);
+		
 		if ( ! is_object($this->_db))
 		{
 			// Get database instance
-			$this->_db = Database::instance($this->_db);
+			$this->_db = Database::instance($this->_db_group);
 		}
-	
+
 		if (empty($this->_table_name))
 		{
 			// Table name is the same as the object name
 			$this->_table_name = $this->_object_name;
-	
+
 			if ($this->_table_names_plural === TRUE)
 			{
 				// Make the table name plural
 				$this->_table_name = Inflector::plural($this->_table_name);
 			}
 		}
-	
-		if ( ! empty($this->_ignored_columns))
-		{
-			// Optimize for performance
-			$this->_ignored_columns = array_combine($this->_ignored_columns, $this->_ignored_columns);
-		}
-	
+
 		foreach ($this->_belongs_to as $alias => $details)
 		{
-			$defaults['model']       = 'Model_' . $alias;
+			$defaults['model'] = 'Model_' . $alias;
 			$defaults['foreign_key'] = $alias.$this->_foreign_key_suffix;
-	
+
 			$this->_belongs_to[$alias] = array_merge($defaults, $details);
 		}
-	
+
 		foreach ($this->_has_one as $alias => $details)
 		{
-			$defaults['model']       = $alias;
+			$defaults['model'] = 'Model_' . $alias;
 			$defaults['foreign_key'] = $this->_object_name.$this->_foreign_key_suffix;
-	
+
 			$this->_has_one[$alias] = array_merge($defaults, $details);
 		}
-	
+
 		foreach ($this->_has_many as $alias => $details)
 		{
-			$defaults['model']       = 'Model_' . Inflector::singular($alias);
+			$defaults['model'] = 'Model_' . Inflector::singular($alias);
 			$defaults['foreign_key'] = $this->_object_name.$this->_foreign_key_suffix;
-			$defaults['through']     = NULL;
-			$defaults['far_key']     = Inflector::singular($alias).$this->_foreign_key_suffix;
-	
+			$defaults['through'] = NULL;
+			$defaults['far_key'] = Inflector::singular($alias).$this->_foreign_key_suffix;
+
 			$this->_has_many[$alias] = array_merge($defaults, $details);
 		}
-	
+
 		// Load column information
 		$this->reload_columns();
+
+		// Clear initial model state
+		$this->clear();
 	}
 	
 	/**
@@ -332,26 +308,22 @@ class ORM extends Kohana_ORM
 	/**
 	 * Handles retrieval of all model values, relationships, and metadata.
 	 *
-	 * @param   string  column name
+	 * @param   string $column Column name
 	 * @return  mixed
 	 */
 	public function __get($column)
 	{
 		if (array_key_exists($column, $this->_object))
 		{
-			$this->_load();
-
 			return $this->_object[$column];
 		}
-		elseif (isset($this->_related[$column]) AND $this->_related[$column]->_loaded)
+		elseif (isset($this->_related[$column]))
 		{
-			// Return related model that has already been loaded
+			// Return related model that has already been fetched
 			return $this->_related[$column];
 		}
 		elseif (isset($this->_belongs_to[$column]))
 		{
-			$this->_load();
-
 			$model = $this->_related($column);
 
 			// Use this model's column and foreign model's primary key
