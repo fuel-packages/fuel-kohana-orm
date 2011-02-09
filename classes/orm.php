@@ -256,6 +256,39 @@ class ORM extends Kohana_ORM
 			
 			return $orm->{$find_type}();
 		}
+		else if (strpos($method, 'count_by_') === 0)
+		{
+			// Create new class
+			$orm = new static;
+			
+			// What we're finding
+			$method = substr($method, 9);
+			
+			// Get the and parts
+			$and_parts = explode('_and_', $method);
+			
+			// Load another instance of this model to find out what the table name is
+			$table_name = $orm->_table_name;
+			
+			foreach ($and_parts as $and_part)
+			{
+				$or_parts = explode('_or_', $and_part);
+				
+				if (count($or_parts) == 1)
+				{
+					$orm->where($or_parts[0], '=', array_shift($arguments));
+				}
+				else
+				{
+					foreach($or_parts as $or_part)
+					{
+						$orm->or_where($or_parts, '=', array_shift($arguments));
+					}
+				}
+			}
+			
+			return $orm->count_all();
+		}
 	}
 	
 	/**
@@ -301,6 +334,36 @@ class ORM extends Kohana_ORM
 			}
 			
 			return $this->{$find_type}();
+		}
+		else if (strpos($method, 'count_by_') === 0)
+		{
+			// What we're finding
+			$method = substr($method, 9);
+			
+			// Get the and parts
+			$and_parts = explode('_and_', $method);
+			
+			// Load another instance of this model to find out what the table name is
+			$table_name = $this->_table_name;
+			
+			foreach ($and_parts as $and_part)
+			{
+				$or_parts = explode('_or_', $and_part);
+				
+				if (count($or_parts) == 1)
+				{
+					$this->where($or_parts[0], '=', array_shift($arguments));
+				}
+				else
+				{
+					foreach($or_parts as $or_part)
+					{
+						$this->or_where($or_parts, '=', array_shift($arguments));
+					}
+				}
+			}
+			
+			return $this->count_all();
 		}
 		else if (strpos($method, 'get_') === 0)
 		{
