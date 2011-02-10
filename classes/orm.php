@@ -256,13 +256,13 @@ class ORM extends Kohana_ORM
 			
 			return $orm->{$find_type}();
 		}
-		else if (strpos($method, 'count_by_') === 0)
+		else if (strpos($method, 'count_all_by_') === 0)
 		{
 			// Create new class
 			$orm = new static;
 			
 			// What we're finding
-			$method = substr($method, 9);
+			$method = substr($method, 13);
 			
 			// Get the and parts
 			$and_parts = explode('_and_', $method);
@@ -335,10 +335,10 @@ class ORM extends Kohana_ORM
 			
 			return $this->{$find_type}();
 		}
-		else if (strpos($method, 'count_by_') === 0)
+		else if (strpos($method, 'count_all_by_') === 0)
 		{
 			// What we're finding
-			$method = substr($method, 9);
+			$method = substr($method, 13);
 			
 			// Get the and parts
 			$and_parts = explode('_and_', $method);
