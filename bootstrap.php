@@ -8,9 +8,9 @@
  * @link		http://www.tjstechnology.com.au
  */
 
-Fuel\Core\Autoloader::add_core_namespace('ORM');
+Autoloader::add_core_namespace('ORM');
 
-Fuel\Core\Autoloader::add_classes(array(
+Autoloader::add_classes(array(
 	'ORM\\Database'				=> __DIR__ . '/classes/database.php',
 	'ORM\\DB'					=> __DIR__ . '/classes/db.php',
 	'ORM\\Inflector'			=> __DIR__ . '/classes/inflector.php',
