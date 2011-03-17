@@ -8,9 +8,9 @@
  * @link		http://www.tjstechnology.com.au
  */
 
-namespace ORM;
+namespace Kohana;
 
-class ORM extends Kohana_ORM
+class Orm extends Kohana_ORM
 {
 	/**
 	 * Construct
@@ -19,7 +19,7 @@ class ORM extends Kohana_ORM
 	 * is created
 	 * 
 	 * @access	public
-	 * @return	ORM
+	 * @return	Orm
 	 */
 	public function __construct($id = NULL)
 	{
@@ -155,7 +155,7 @@ class ORM extends Kohana_ORM
 	 * Factory (Depreciated)
 	 * 
 	 * Used to return new instance of 
-	 * ORM. Note this function is only for backwards
+	 * Orm. Note this function is only for backwards
 	 * compatibility (sort of), and you should use
 	 * static::init() instead (or magic methods).
 	 * 

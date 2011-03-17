@@ -17,7 +17,7 @@
  * @license    http://kohanaframework.org/license
  */
 
-namespace ORM;
+namespace Kohana;
 
 class Kohana_ORM {
 
