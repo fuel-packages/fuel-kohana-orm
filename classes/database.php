@@ -8,7 +8,7 @@
  * @link		http://www.tjstechnology.com.au
  */
 
-namespace ORM;
+namespace Kohana;
 
 abstract class Database extends \Fuel\Core\Database_Connection
 {

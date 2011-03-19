@@ -69,7 +69,7 @@
 				
 				// Due to popular demand, you can use the old factory method,
 				// Although this is NOT recommended. For example
-				$clients = \ORM::factory('\\clients')->find_all();
+				$clients = \Kohana\Orm\::factory('\\clients')->find_all();
 				
 				// Note, you need to provide the namespace for the model to be
 				// loaded using the factory method, replacing single slashes with
@@ -77,7 +77,7 @@
 			}
 
 			// DOCROOT/app/classes/model/client.php
-			class Model_Client extends \ORM
+			class Model_Client extends \Kohana\Orm
 			{
 				// Relationships are defined as follows:
 				

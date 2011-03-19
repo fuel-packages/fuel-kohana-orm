@@ -8,7 +8,7 @@
  * @link		http://www.tjstechnology.com.au
  */
 
-namespace ORM;
+namespace Kohana;
 
 class Kohana_Exception extends \Exception {
 

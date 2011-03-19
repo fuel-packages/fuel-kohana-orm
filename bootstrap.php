@@ -8,15 +8,15 @@
  * @link		http://www.tjstechnology.com.au
  */
 
-Autoloader::add_core_namespace('ORM');
+Autoloader::add_core_namespace('Kohana');
 
 Autoloader::add_classes(array(
-	'ORM\\Database'				=> __DIR__ . '/classes/database.php',
-	'ORM\\DB'					=> __DIR__ . '/classes/db.php',
-	'ORM\\Inflector'			=> __DIR__ . '/classes/inflector.php',
-	'ORM\\Kohana_ORM'			=> __DIR__ . '/classes/kohana/orm.php',
-	'ORM\\Kohana_Exception'		=> __DIR__ . '/classes/kohana/exception.php',
-	'ORM\\ORM'					=> __DIR__ . '/classes/orm.php',
+	'Kohana\\Database'				=> __DIR__ . '/classes/database.php',
+	'Kohana\\DB'					=> __DIR__ . '/classes/db.php',
+	'Kohana\\Inflector'				=> __DIR__ . '/classes/inflector.php',
+	'Kohana\\Kohana_ORM'			=> __DIR__ . '/classes/kohana/orm.php',
+	'Kohana\\Kohana_Exception'		=> __DIR__ . '/classes/kohana/exception.php',
+	'Kohana\\Orm'					=> __DIR__ . '/classes/orm.php',
 ));
 
 /* End of file bootstrap.php */
