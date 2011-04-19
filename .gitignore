@@ -1,1 +1,11 @@
+*~
+*.bak
+Thumbs.db
+desktop.ini
 .DS_Store
+.buildpath
+.project
+.settings
+nbproject/
+.idea
+*.tmproj
