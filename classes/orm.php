@@ -203,45 +203,52 @@ class Orm extends Kohana_ORM {
 		
 		$type	= null;
 		$fields	= null;
+		$magic	= false;
 		
 		if (strpos($method, 'count_all_by') === 0)
 		{
 			$type		= 'count_all';
 			$fields		= substr($method, 13);
+			$magic		= true;
 		}
 		
 		if (strpos($method, 'find_all_by') === 0)
 		{
 			$type		= 'find_all';
 			$fields		= substr($method, 12);
+			$magic		= true;
 		}
 		
 		if (strpos($method, 'find_by') === 0)
 		{
 			$type		= 'find';
 			$fields		= substr($method, 8);
+			$magic		= true;
 		}
 		
-		if ($and_parts = explode('_and_', $fields))
+		if ($magic === true)
 		{
-			foreach ($and_parts as $and_part)
+			if ($and_parts = explode('_and_', $fields))
 			{
-				$or_parts = explode('_or_', $and_part);
-				
-				if (count($or_parts) == 1)
+				foreach ($and_parts as $and_part)
 				{
-					$this->_db_pending[] = array('name' => 'where', 'args' => array($or_parts[0], '=', array_shift($arguments)));
-				}
-				else
-				{
-					foreach ($or_parts as $or_part)
+					$or_parts = explode('_or_', $and_part);
+
+					if (count($or_parts) == 1)
 					{
-						$this->_db_pending[] = array('name' => 'or_where', 'args' => array($or_part, '=', array_shift($arguments)));
+						$this->_db_pending[] = array('name' => 'where', 'args' => array($or_parts[0], '=', array_shift($arguments)));
+					}
+					else
+					{
+						foreach ($or_parts as $or_part)
+						{
+							$this->_db_pending[] = array('name' => 'or_where', 'args' => array($or_part, '=', array_shift($arguments)));
+						}
 					}
 				}
+				
+				return $this->$type();
 			}
-			
-			return $this->$type();
 		}
 		
 		return parent::__call($method, $arguments);
