@@ -92,7 +92,7 @@ class Orm extends Kohana_ORM {
 	protected function _initialize()
 	{
 		// Set the object name and plural name
-		$this->_object_name		= substr(\Inflector::denamespace(get_class($this)), 6);
+		$this->_object_name		= strtolower(substr(\Inflector::denamespace(get_class($this)), 6));
 		$this->_object_plural	= Inflector::plural($this->_object_name);
 		
 		if ( ! is_object($this->_db))
@@ -104,12 +104,12 @@ class Orm extends Kohana_ORM {
 		if (empty($this->_table_name))
 		{
 			// Table name is the same as the namespace (module) plus the object name
-			$this->_table_name = str_replace('\\', '_', \Inflector::get_namespace(get_class($this))) . $this->_object_name;
+			$this->_table_name = strtolower(str_replace('\\', '_', \Inflector::get_namespace(get_class($this)))) . $this->_object_name;
 
 			if ($this->_table_names_plural === TRUE)
 			{
 				// Make the table name plural
-				$this->_table_name = Inflector::plural(str_replace('\\', '_', \Inflector::get_namespace(get_class($this))) . $this->_object_name);
+				$this->_table_name = Inflector::plural($this->_table_name);
 			}
 		}
 
@@ -144,5 +144,141 @@ class Orm extends Kohana_ORM {
 
 		// Clear initial model state
 		$this->clear();
+	}
+	
+	/**
+	 * Validation
+	 * 
+	 * Initializes validation rules, and labels
+	 *
+	 * @access	protected
+	 */
+	protected function _validation()
+	{
+		// Still need to add
+		// validation or use Fuel's Validation
+	}
+	
+	/**
+	 * Check
+	 * 
+	 * Validates the current model's data
+	 * 
+	 * @access	protected
+	 * @param	Validation	Extra Validation
+	 * @return	Kohana\Orm
+	 */
+	public function check(Validation $extra_validation = NULL)
+	{
+		// Still need to add
+		// validation or use Fuel's Validation
+		return $this;
+	}
+	
+	/**
+	 * Call
+	 * 
+	 * Magic method used as getters / setters
+	 * 
+	 * @access	public
+	 * @param   string  $method Method name
+	 * @param   array   $args   Method arguments
+	 * @return  mixed
+	 */
+	public function __call($method, $arguments)
+	{
+		// Get the key
+		$key = substr($method, 4);
+		
+		// Check different setters / getters
+		// and return results if applicable
+		switch (substr($method, 0, 3))
+		{
+			case 'get':
+				return $this->$key;
+			case 'set':
+				$this->$key = (isset($arguments[0])) ? $arguments[0] : null;
+				return $this;
+				// return $this->set_data($key, isset($arguments[0]) ? $arguments[0] : null);
+		}
+		
+		// if ($method == '_init')
+		// {
+		// 	return;
+		// }
+		// 
+		// // Start with count_by? Get counting!
+		// if (strpos($method, 'count_by') === 0)
+		// {
+		// 	$find_type = 'count';
+		// 	$fields = substr($method, 9);
+		// }
+		// 
+		// // Otherwise, lets find stuff
+		// elseif (strpos($method, 'find_') === 0)
+		// {
+		// 	$find_type = strncmp($method, 'find_all_by_', 12) === 0 ? 'all' : (strncmp($method, 'find_by_', 8) === 0 ? 'first' : false);
+		// 	$fields = $find_type === 'first' ? substr($method, 8) : substr($method, 12);
+		// }
+		// 
+		// // God knows, complain
+		// else
+		// {
+		// 	throw new \Fuel_Exception('Invalid method call.  Method '.$method.' does not exist.', 0);
+		// }
+		// 
+		// $where = $or_where = array();
+		// 
+		// if (($and_parts = explode('_and_', $fields)))
+		// {
+		// 	foreach ($and_parts as $and_part)
+		// 	{
+		// 		$or_parts = explode('_or_', $and_part);
+		// 
+		// 		if (count($or_parts) == 1)
+		// 		{
+		// 			$where[] = array($or_parts[0] => array_shift($args));
+		// 		}
+		// 		else
+		// 		{
+		// 			foreach($or_parts as $or_part)
+		// 			{
+		// 				$or_where[] = array($or_part => array_shift($args));
+		// 			}
+		// 		}
+		// 	}
+		// }
+		// 
+		// $options = count($args) > 0 ? array_pop($args) : array();
+		// 
+		// if ( ! array_key_exists('where', $options))
+		// {
+		// 	$options['where'] = $where;
+		// }
+		// else
+		// {
+		// 	$options['where'] = array_merge($where, $options['where']);
+		// }
+		// 
+		// if ( ! array_key_exists('or_where', $options))
+		// {
+		// 	$options['or_where'] = $or_where;
+		// }
+		// else
+		// {
+		// 	$options['or_where'] = array_merge($or_where, $options['or_where']);
+		// }
+		// 
+		// if ($find_type == 'count')
+		// {
+		// 	return static::count($options);
+		// }
+		// 
+		// else
+		// {
+		// 	return static::find($find_type, $options);
+		// }
+		
+		return parent::__call($method, $arguments);
 	}
 }
