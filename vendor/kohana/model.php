@@ -1,4 +1,13 @@
 <?php
+
+/**
+ * Line Change
+ * 
+ * @original	
+ * @modified	namespace Kohana;
+ */
+namespace Kohana;
+
 /**
  * Model base class. All models should extend this class.
  *
@@ -8,9 +17,6 @@
  * @copyright  (c) 2008-2011 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-
-namespace ORM;
-
 abstract class Kohana_Model {
 
 	/**
