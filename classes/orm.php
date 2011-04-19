@@ -181,9 +181,9 @@ class Orm extends Kohana_ORM {
 	 * Magic method used as getters / setters
 	 * 
 	 * @access	public
-	 * @param   string  $method Method name
-	 * @param   array   $args   Method arguments
-	 * @return  mixed
+	 * @param	string	Method
+	 * @param	array	Arguments
+	 * @return	mixed
 	 */
 	public function __call($method, $arguments)
 	{
@@ -199,86 +199,66 @@ class Orm extends Kohana_ORM {
 			case 'set':
 				$this->$key = (isset($arguments[0])) ? $arguments[0] : null;
 				return $this;
-				// return $this->set_data($key, isset($arguments[0]) ? $arguments[0] : null);
 		}
 		
-		// if ($method == '_init')
-		// {
-		// 	return;
-		// }
-		// 
-		// // Start with count_by? Get counting!
-		// if (strpos($method, 'count_by') === 0)
-		// {
-		// 	$find_type = 'count';
-		// 	$fields = substr($method, 9);
-		// }
-		// 
-		// // Otherwise, lets find stuff
-		// elseif (strpos($method, 'find_') === 0)
-		// {
-		// 	$find_type = strncmp($method, 'find_all_by_', 12) === 0 ? 'all' : (strncmp($method, 'find_by_', 8) === 0 ? 'first' : false);
-		// 	$fields = $find_type === 'first' ? substr($method, 8) : substr($method, 12);
-		// }
-		// 
-		// // God knows, complain
-		// else
-		// {
-		// 	throw new \Fuel_Exception('Invalid method call.  Method '.$method.' does not exist.', 0);
-		// }
-		// 
-		// $where = $or_where = array();
-		// 
-		// if (($and_parts = explode('_and_', $fields)))
-		// {
-		// 	foreach ($and_parts as $and_part)
-		// 	{
-		// 		$or_parts = explode('_or_', $and_part);
-		// 
-		// 		if (count($or_parts) == 1)
-		// 		{
-		// 			$where[] = array($or_parts[0] => array_shift($args));
-		// 		}
-		// 		else
-		// 		{
-		// 			foreach($or_parts as $or_part)
-		// 			{
-		// 				$or_where[] = array($or_part => array_shift($args));
-		// 			}
-		// 		}
-		// 	}
-		// }
-		// 
-		// $options = count($args) > 0 ? array_pop($args) : array();
-		// 
-		// if ( ! array_key_exists('where', $options))
-		// {
-		// 	$options['where'] = $where;
-		// }
-		// else
-		// {
-		// 	$options['where'] = array_merge($where, $options['where']);
-		// }
-		// 
-		// if ( ! array_key_exists('or_where', $options))
-		// {
-		// 	$options['or_where'] = $or_where;
-		// }
-		// else
-		// {
-		// 	$options['or_where'] = array_merge($or_where, $options['or_where']);
-		// }
-		// 
-		// if ($find_type == 'count')
-		// {
-		// 	return static::count($options);
-		// }
-		// 
-		// else
-		// {
-		// 	return static::find($find_type, $options);
-		// }
+		$type	= null;
+		$fields	= null;
+		
+		if (strpos($method, 'count_all_by') === 0)
+		{
+			$type		= 'count_all';
+			$fields		= substr($method, 13);
+		}
+		
+		if (strpos($method, 'find_all_by') === 0)
+		{
+			$type		= 'find_all';
+			$fields		= substr($method, 12);
+		}
+		
+		if (strpos($method, 'find_by') === 0)
+		{
+			$type		= 'find';
+			$fields		= substr($method, 8);
+		}
+		
+		if ($and_parts = explode('_and_', $fields))
+		{
+			foreach ($and_parts as $and_part)
+			{
+				$or_parts = explode('_or_', $and_part);
+				
+				if (count($or_parts) == 1)
+				{
+					$this->_db_pending[] = array('name' => 'where', 'args' => array($or_parts[0], '=', array_shift($arguments)));
+				}
+				else
+				{
+					foreach ($or_parts as $or_part)
+					{
+						$this->_db_pending[] = array('name' => 'or_where', 'args' => array($or_part, '=', array_shift($arguments)));
+					}
+				}
+			}
+			
+			return $this->$type();
+		}
 		
 		return parent::__call($method, $arguments);
+	}
+	
+	/**
+	 * Call Static
+	 * 
+	 * Static magic method used as getters / setters
+	 * 
+	 * @access	public
+	 * @param	string	Method
+	 * @param	array	Arguments
+	 * @return	mixed
+	 */
+	public static function __callStatic($method, $arguments)
+	{
+		return static::factory()->__call($method, $arguments);
 	}
 }
