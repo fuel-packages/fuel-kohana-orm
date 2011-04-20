@@ -13,6 +13,8 @@
  * @website		http://www.tjstechnology.com.au
  * @license		See LICENSE.md
  */
+namespace Kohana;
+
 class Validation extends \Fuel\Core\Validation {
 	
 }
