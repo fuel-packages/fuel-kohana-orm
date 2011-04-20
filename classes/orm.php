@@ -197,19 +197,6 @@ class Orm extends Kohana_ORM {
 	}
 	
 	/**
-	 * Errors
-	 * 
-	 * Returns validation errors
-	 * 
-	 * @access	public
-	 * @return	array	Errors
-	 */
-	public function errors()
-	{
-		return $this->_validation->errors();
-	}
-	
-	/**
 	 * Call
 	 * 
 	 * Magic method used as getters / setters
