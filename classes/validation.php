@@ -17,4 +17,21 @@ namespace Kohana;
 
 class Validation extends \Fuel\Core\Validation {
 	
+	/**
+	 * Check
+	 * 
+	 * Checks the validation object
+	 * against the rules provided
+	 * 
+	 * This is just a wrapper for Kohana
+	 * users who are used to calling check()
+	 * on a model to validate data
+	 * 
+	 * @access	public
+	 * @return	mixed
+	 */
+	public function check()
+	{
+		return parent::run();
+	}
 }
