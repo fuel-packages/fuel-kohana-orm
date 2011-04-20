@@ -151,6 +151,9 @@ class Orm extends Kohana_ORM {
 
 			$this->_has_many[$alias] = array_merge($defaults, $details);
 		}
+		
+		// Build the validation object with its rules
+		$this->_validation = Validation::factory($this->_object);
 
 		// Load column information
 		$this->reload_columns();
@@ -168,8 +171,7 @@ class Orm extends Kohana_ORM {
 	 */
 	protected function _validation()
 	{
-		// Still need to add
-		// validation or use Fuel's Validation
+		return null;
 	}
 	
 	/**
@@ -177,15 +179,34 @@ class Orm extends Kohana_ORM {
 	 * 
 	 * Validates the current model's data
 	 * 
-	 * @access	protected
+	 * @access	public
 	 * @param	Validation	Extra Validation
 	 * @return	Kohana\Orm
 	 */
-	public function check(Validation $extra_validation = NULL)
+	public function check(Validation $extra_validation = null)
 	{
-		// Still need to add
-		// validation or use Fuel's Validation
-		return $this;
+		// Run the rules
+		$this->rules();
+		
+		if ($this->_validation->run($this->as_array()))
+		{
+			return $this;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Errors
+	 * 
+	 * Returns validation errors
+	 * 
+	 * @access	public
+	 * @return	array	Errors
+	 */
+	public function errors()
+	{
+		return $this->_validation->errors();
 	}
 	
 	/**
