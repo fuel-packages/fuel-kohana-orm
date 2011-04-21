@@ -62,11 +62,13 @@ class Orm extends Kohana_ORM {
 				$model = sprintf('Model_%s', ucfirst($model));
 			}
 			
+			// If the class exists already load it
+			// otherwise we'll continue to find
+			// the class in namespaces
 			if (class_exists($model))
 			{
 				return new $model($id);
 			}
-			
 			
 			// We need to work out the controller
 			// that called the Kohana\Orm::factory()
@@ -108,7 +110,7 @@ class Orm extends Kohana_ORM {
 		
 		// The Id to load
 		$id = $param_1;
-
+		
 		// Return the called class
 		return new static($id);
 	}
