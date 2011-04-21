@@ -71,25 +71,44 @@ class Orm extends Kohana_ORM {
 			// We need to work out the controller
 			// that called the Kohana\Orm::factory()
 			$calling_class = debug_backtrace();
-			$calling_class = $calling_class[1]['class'];
+			$calling_class = $calling_class[1];
+			
+			// The class that called this
+			$class = $calling_class['class'];
+			
+			// If this was loaded through a relationship, we can
+			// Look at the model to find out what it is
+			if (Inflector::get_namespace($class) === 'Kohana\\')
+			{
+				$class = get_class($calling_class['object']);
+			}
 			
 			// Get the namespace of the calling class
-			$calling_namespace = Inflector::get_namespace($calling_class);
+			$namespace = Inflector::get_namespace($class);
+			
+			// Get the final model to load
+			$model = $namespace . $model;
 			
 			// If the class exists return it
-			if (class_exists($calling_namespace . $model))
+			if (class_exists($model))
 			{
-				$model = $calling_namespace . $model;
-				
 				return new $model($id);
 			}
 			
-			return;
+			// If we haven't found a model
+			// to load now, throw an exception
+			throw new Kohana_Exception(':method() could not find a class to load - class determined to be loaded is :class', array(
+				':method'	=> __METHOD__,
+				':class'	=> $model,
+			));
 		}
+		
+		// If the person called factory()
+		// explicitly through the model
 		
 		// The Id to load
 		$id = $param_1;
-		
+
 		// Return the called class
 		return new static($id);
 	}
