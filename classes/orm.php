@@ -227,7 +227,7 @@ class Orm extends Kohana_ORM {
 	 * @param	array	Arguments
 	 * @return	mixed
 	 */
-	public function __call($method, $arguments)
+	public function __call($method, array $arguments)
 	{
 		// Get the key
 		$key = substr($method, 4);
