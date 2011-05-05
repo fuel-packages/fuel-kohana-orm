@@ -227,7 +227,7 @@ class Orm extends Kohana_ORM {
 	 * @param	array	Arguments
 	 * @return	mixed
 	 */
-	public function __call($method, $arguments)
+	public function __call($method, array $arguments)
 	{
 		// Get the key
 		$key = substr($method, 4);
@@ -306,8 +306,54 @@ class Orm extends Kohana_ORM {
 	 * @param	array	Arguments
 	 * @return	mixed
 	 */
-	public static function __callStatic($method, $arguments)
+	public static function __callStatic($method, array $arguments)
 	{
 		return static::factory()->__call($method, $arguments);
+	}
+	
+	/**
+	 * For Select
+	 * 
+	 * Prepares the results
+	 * for a Form::select();
+	 * 
+	 * The first parameter is the column
+	 * name used as the label for the option
+	 * and the second one is used as the value
+	 * (defaulted to the primary key)
+	 * 
+	 * Usage:
+	 * 
+	 * 		// In Controller
+	 * 		$this->response->body = \View::factory('foo/bar')
+	 * 									 ->set('countries', Model_Country::factory()->where('code', 'NOT LIKE', 'US')->for_select());
+	 * 
+	 * 		// In View
+	 * 		<?=\Form::select('countries', null, $countries);
+	 */
+	public function for_select($label, $value = null)
+	{
+		// We need a label
+		if ( ! $label)
+		{
+			throw new Kohana_Exception('A label is required for :method()', array(
+				':method'	=> __METHOD__,
+			));
+		}
+		
+		// Select fallback
+		$select = array();
+		
+		// Methods to get data 
+		$label_method = sprintf('get_%s', $label);
+		$value_method = ($value) ? sprintf('get_%s', $value) : 'pk';
+		
+		// Loop through and build array
+		foreach ($this->find_all() as $result)
+		{
+			$select[$result->$value_method()] = $result->$label_method();
+		}
+		
+		return $select;
 	}
 }
