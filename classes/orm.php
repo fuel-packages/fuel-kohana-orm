@@ -237,8 +237,18 @@ class Orm extends Kohana_ORM {
 		switch (substr($method, 0, 3))
 		{
 			case 'get':
+				
+				// There must be a key provided. Not just $model->get();
+				if ( ! $key) throw new Kohana_Exception('Invalid method :method called in :class',
+					array(':method' => 'get', ':class' => get_class($this)));
+				
 				return $this->$key;
 			case 'set':
+				
+				// There must be a key provided. Not just $model->set();
+				if ( ! $key) throw new Kohana_Exception('Invalid method :method called in :class',
+					array(':method' => 'set', ':class' => get_class($this)));
+				
 				$this->$key = (isset($arguments[0])) ? $arguments[0] : null;
 				return $this;
 		}
