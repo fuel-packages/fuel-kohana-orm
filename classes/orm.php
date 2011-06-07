@@ -174,7 +174,7 @@ class Orm extends Kohana_ORM {
 		}
 		
 		// Build the validation object with its rules
-		$this->_validation = Validation::factory($this->_object);
+		$this->_validation = Validation::factory(sprintf('%s%s', $this->_object_name, rand()));
 
 		// Load column information
 		$this->reload_columns();
