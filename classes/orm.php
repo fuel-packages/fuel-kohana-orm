@@ -404,27 +404,25 @@ class Orm extends Kohana_ORM {
 			$label = $this->_for_select;
 		}
 		
-		// We need a label
-		if ( ! $label)
-		{
-			throw new Kohana_Exception('A label is required for :method()', array(
-				':method'	=> __METHOD__,
-			));
-		}
-		
 		// Select fallback
 		$select = array();
 		
 		// Methods to get data 
 		$label_method = sprintf('get_%s', $label);
-		$value_method = ($value) ? sprintf('get_%s', $value) : 'pk';
+		
+		// Value method
+		if ($value === null) $value_method = 'pk';
+		elseif ($value === false) $value_method = false;
+		else $value_method = $value;
 		
 		// Loop through and build array
 		foreach ($this->find_all() as $result)
 		{
-			$select[$result->$value_method()] = $result->$label_method();
+			if ($value_method) $select[$result->$value_method()] = $result->$label_method();
+			else $select[] = $result->$label_method();
 		}
 		
+		// Return the array
 		return $select;
 	}
 }
