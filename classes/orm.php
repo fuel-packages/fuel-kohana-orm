@@ -25,6 +25,13 @@ class Orm extends Kohana_ORM {
 	protected static $_instance = null;
 	
 	/**
+	 * Default for_select() property
+	 * 
+	 * @var	string
+	 */
+	protected $_for_select = null;
+	
+	/**
 	 * Instance
 	 * 
 	 * Get the instance of the
@@ -384,8 +391,19 @@ class Orm extends Kohana_ORM {
 	 * 		// In View
 	 * 		<?=\Form::select('countries', null, $countries);
 	 */
-	public function for_select($label, $value = null)
+	public function for_select($label = null, $value = null)
 	{
+		// If a label isn't provided
+		// use the for select property
+		if ( ! $label)
+		{
+			// Set the for select property
+			if ( ! $this->_for_select) $this->_for_select = $this->pk();
+			
+			// And the label
+			$label = $this->_for_select;
+		}
+		
 		// We need a label
 		if ( ! $label)
 		{
