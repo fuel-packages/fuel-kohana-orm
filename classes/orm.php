@@ -32,6 +32,13 @@ class Orm extends Kohana_ORM {
 	protected $_for_select = null;
 	
 	/**
+	 * Boolean to determine if rules have been run or not
+	 * 
+	 * @var	bool
+	 */
+	protected $_rules_ran = false;
+	
+	/**
 	 * Instance
 	 * 
 	 * Get the instance of the
@@ -224,7 +231,7 @@ class Orm extends Kohana_ORM {
 		}
 		
 		// Build the validation object with its rules
-		$this->_validation = Validation::factory(sprintf('%s%s%s', $this->_object_name, microtime(), rand()));
+		$this->_validation = Validation::factory(sprintf('%s%s%s', $this->_object_name, microtime(), mt_rand()));
 
 		// Load column information
 		$this->reload_columns();
@@ -252,12 +259,20 @@ class Orm extends Kohana_ORM {
 	 * 
 	 * @access	public
 	 * @param	Validation	Extra Validation
+	 * @param	bool		Force rules to re-run
 	 * @return	Kohana\Orm
 	 */
-	public function check(Validation $extra_validation = null)
+	public function check(Validation $extra_validation = null, $force = false)
 	{
-		// Run the rules
-		$this->rules();
+		// Run the rules if we have to
+		if ( ! $this->_rules_ran or $force === true)
+		{
+			// Run the rules
+			$this->rules();
+			
+			// Mark the flag
+			$this->_rules_ran = true;
+		}
 		
 		if ($this->_validation->run($this->as_array()))
 		{
