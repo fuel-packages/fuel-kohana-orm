@@ -428,7 +428,7 @@ class Orm extends Kohana_ORM {
 		// Value method
 		if ($value === null) $value_method = 'pk';
 		elseif ($value === false) $value_method = false;
-		else $value_method = $value;
+		else $value_method = sprintf('get_%s', $value);
 		
 		// Loop through and build array
 		foreach ($this->find_all() as $result)
