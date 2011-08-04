@@ -296,7 +296,6 @@ class Orm extends Kohana_ORM {
 	{
 		// Get the key
 		$key = substr($method, 4);
-		
 		// Check different setters / getters
 		// and return results if applicable
 		switch (substr($method, 0, 3))
@@ -310,9 +309,15 @@ class Orm extends Kohana_ORM {
 				return $this;
 			
 			case 'has':
-			case 'is':
 				return (bool) $this->$key;
 				break;
+		}
+		
+		// Is magic method
+		if (substr($method, 0, 2) === 'is')
+		{
+			$key = substr($method, 3);
+			return (bool) $this->$key;
 		}
 		
 		$type	= null;
